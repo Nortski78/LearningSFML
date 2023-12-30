@@ -49,8 +49,7 @@ public:
             shape->setFillColor(sf::Color(m_red, m_green, m_blue));
             shape->setPosition(m_xpos, m_ypos);
         }
-    }
-    
+    }    
     
     const std::shared_ptr<sf::Shape> getShape() {
         return shape;
