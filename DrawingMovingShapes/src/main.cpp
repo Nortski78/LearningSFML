@@ -10,6 +10,8 @@ class MyShape {
     float m_xpos = 0.0f, m_ypos = 0.0f, m_xvel = 0.0f, m_yvel = 0.0f, m_width = 0.0f, m_height = 0.0f, m_radius = 0.0f;
     int m_red = 255, m_green = 255, m_blue = 255;
     std::shared_ptr<sf::Shape> shape;
+    sf::Font font;
+    std::shared_ptr<sf::Text> text = std::make_shared<sf::Text>();
 
 public:
     MyShape(const std::string objectType, const std::string name, float xpos, float ypos, float xvel, float yvel, int r, int g, int b, float radius )
@@ -28,6 +30,7 @@ public:
             shape = std::make_shared<sf::CircleShape>(m_radius);
             shape->setFillColor(sf::Color(m_red, m_green, m_blue));
             shape->setPosition(m_xpos, m_ypos);
+            loadFont();
         }
     }
 
@@ -48,11 +51,30 @@ public:
             shape = std::make_shared<sf::RectangleShape>(sf::Vector2f(m_width, m_height));
             shape->setFillColor(sf::Color(m_red, m_green, m_blue));
             shape->setPosition(m_xpos, m_ypos);
+            loadFont();
         }
     }    
     
     const std::shared_ptr<sf::Shape> getShape() {
         return shape;
+    }
+    const std::shared_ptr<sf::Text> drawText() {
+        return text;
+    }
+
+    int loadFont() {
+        if (!font.loadFromFile("assets/fonts/arial.ttf"))
+        {
+            // error...
+            std::cerr << "Could not load font!" << std::endl;
+            return -1;
+        }
+
+        text->setFont(font);
+        text->setString(m_name);
+        text->setCharacterSize(12);
+        text->setFillColor(sf::Color::White);
+        text->setPosition(m_xpos + ((m_width / 2) - (text->getGlobalBounds().width / 2)) + m_radius, m_ypos + ((m_height / 2) - (text->getGlobalBounds().height)) + m_radius);
     }
 
     void updatePosition(sf::Vector2u winSize) {
@@ -67,6 +89,7 @@ public:
         }
 
         shape->setPosition(shape->getPosition().x + m_xvel, shape->getPosition().y + m_yvel);
+        text->setPosition(text->getPosition().x + m_xvel, text->getPosition().y + m_yvel);
     }
 };
 
@@ -100,7 +123,7 @@ void loadFromFile(const std::string filename, sf::RenderWindow& window, std::vec
 int main()
 {
     std::vector<std::shared_ptr<MyShape>> myShapes;
-    sf::RenderWindow window;    
+    sf::RenderWindow window;
 
     loadFromFile("src/config.txt", window, myShapes);
     window.setFramerateLimit(60);
@@ -118,6 +141,7 @@ int main()
         window.clear(sf::Color::Black);
         for (auto& shape : myShapes) {
             window.draw(*shape->getShape());
+            window.draw(*shape->drawText());
             shape->updatePosition(window.getSize());
         }
         window.display();
